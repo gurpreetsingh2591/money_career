@@ -1,0 +1,133 @@
+name: money_carer
+description: Money Carer App
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 1.0.0
+
+environment:
+  sdk: ">=2.16.2 <3.0.0"
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  json_annotation: ^4.5.0
+  local_auth: ^1.1.0
+  fluttertoast: ^8.0.9
+  flutter_markdown: ^0.6.9
+  flutter_spinkit: ^5.0.0
+  video_thumbnail: ^0.4.3
+  path_provider: ^2.0.10
+  flutter_pdfview: ^1.2.1
+  share_extend: ^2.0.0
+  device_info_plus: ^4.0.0
+  url_launcher: ^6.1.1
+  flutter_phone_direct_caller: ^2.1.0
+  sleek_circular_slider: ^2.0.1
+  youtube_player_flutter: ^8.0.0
+  image_picker: ^0.8.3
+  shared_preferences: ^2.0.13
+  json_serializable: ^6.2.0
+  dio: ^4.0.0
+  logger: ^1.1.0
+  http: ^0.13.4
+  readmore: ^2.1.0
+  pin_code_fields: ^7.4.0
+  uuid:
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.9.2
+  hive_generator: ^1.1.2
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^1.0.0
+  build_runner: ^2.0.4
+  dependency_validator:
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/onBoard/icons.png
+    - assets/onBoard/slider.png
+    - assets/onBoard/union.png
+    - assets/onBoard/ellipse.png
+    - assets/onBoard/bridgeman_hp.png
+    - assets/onBoard/bg_board_two.png
+    - assets/onBoard/bg_board_three.png
+    - assets/login/logo_img.png
+    - assets/login/ellipse_colored.png
+    - assets/login/edit_bg.png
+    - assets/login/rectangle_checkbox_bg.png
+    - assets/onBoard/slider_two.png
+    - assets/onBoard/slider_white.png
+    - assets/otp/ellipse_bottom.png
+    - assets/otp/face_id.png
+    - assets/otp/rectangle.png
+    - assets/home/profile_circle.png
+    - assets/home/close_icon_black.png
+    - assets/home/drawer_bg.png
+    - assets/home/circle_border.png
+    - assets/home/down_icon.png
+    - assets/home/rectangle_bg.png
+    - assets/home/rectangle_bg_account.png
+    - assets/home/progress_bg.png
+    - assets/home/forword_arrow.png
+    - assets/home/forward_button_pink.png
+    - assets/home/checked_checkbox.png
+    - assets/news/vector_bg.png
+    - assets/single_account/filled_close_icon.png
+    - assets/single_account/pdf_img.png
+    - assets/single_account/ellipse_small.png
+    - assets/scan/camera_icon.png
+    - assets/scan/close_btn.png
+    - assets/scan/note_bg.png
+    - assets/scan/play_icon.png
+    - assets/ca/lets-encrypt-r3.pem
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Black.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+        - asset: assets/fonts/Poppins-Light.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Black.ttf
+        - asset: assets/fonts/Inter-Bold.ttf
+        - asset: assets/fonts/Inter-Light.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-SemiBold.ttf
+
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/custom-fonts/#from-packages

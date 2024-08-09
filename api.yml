@@ -1,0 +1,685 @@
+openapi: 3.1.0
+info:
+  title: mobile2
+  version: '1.0'
+  description: Monika Mobile API 2.0
+  contact:
+    name: Money Carer Support
+    email: support@moneycarer.org.uk
+    url: 'https://moneycarer.org.uk'
+  termsOfService: 'https://moneycarer.org.uk'
+servers:
+  - url: 'https://mobile.moneycarer.org.uk'
+    description: Live Server
+  - url: 'https://test-mobile.moneymanagement.org.uk'
+    description: Test Server
+paths:
+  '/account/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Retrieve account
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountDetail'
+        '404':
+          $ref: '#/components/responses/Message'
+      operationId: get-account-id
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: ID of the account to access
+          required: true
+      tags:
+        - account
+      description: Retrieve a specific account
+  /account/list:
+    parameters: []
+    get:
+      summary: Get a list of accounts that the app user has access to
+      tags:
+        - account
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountList'
+      operationId: get-accounts-list
+      description: Get a list of all accessible accounts that the user has access to
+      parameters: []
+  /account/takeallowance:
+    post:
+      summary: Request transfer of discretionary allowance
+      operationId: post-account-takeallowance
+      responses:
+        '200':
+          $ref: '#/components/responses/Message'
+        '400':
+          $ref: '#/components/responses/Message'
+      description: >-
+        Clients are optionally given two allowance funds on a weekly, bi-weekly,
+        monthly or never basis.  One allowance fund is for the client themselves
+        and the second is for a Carer to grant to the client.  In either case a
+        justification must be provided - transfer is not automatic and will form
+        part of the next payments run on working days.
+
+
+        This operation should only ever be available for Client Budget accounts.
+
+
+        Need to check that the 'access' bitset on the account has the 0x20 role
+        for discretionary allowance.
+      tags:
+        - account
+        - discretionary
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                  format: uuid
+                  example: 99999999-8888-7777-6666-555555555555
+                accId:
+                  type: string
+                  format: uuid
+                  example: 11111111-2222-3333-4444-555555555555
+                amount:
+                  type: integer
+                  minimum: 10
+                  maximum: 500
+                  multipleOf: 10
+                  example: 30
+                  format: int32
+                  description: >-
+                    Amount of funds requested in pounds - must be greater than
+                    zero and a multiple of ten.  Further, must be less or equal
+                    to the remaining funds on the account.
+              required:
+                - clientId
+                - accId
+                - amount
+        description: Parameters passed as a mandatory JSON object
+    parameters: []
+  /account/transactions:
+    post:
+      summary: List transactions for an account
+      operationId: post-account-transactions
+      responses:
+        '200':
+          $ref: '#/components/responses/TransactionList'
+      tags:
+        - account
+      description: List transaction for an account with paging parameters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                  format: uuid
+                  example: 11111111-2222-3333-4444-555555555555
+                accId:
+                  type: string
+                  format: uuid
+                  example: 11111111-2222-3333-4444-555555555555
+                pageNo:
+                  type: integer
+                  example: 1
+                  minimum: 1
+                  format: int32
+                pageSize:
+                  type: integer
+                  example: 15
+                  minimum: 5
+                  maximum: 50
+                  multipleOf: 5
+                  format: int32
+              required:
+                - clientId
+                - accId
+                - pageNo
+                - pageSize
+  /account/statement:
+    get:
+      summary: Access a PDF Statement for a client account
+      tags:
+        - account
+        - statement
+      responses:
+        '200':
+          description: OK
+          content:
+            application/pdf:
+              schema:
+                type: object
+                properties: {}
+        '412':
+          $ref: '#/components/responses/Message'
+      operationId: get-account-statement
+      description: >-
+        If the App User has access to view transactions for the account then
+        they can also request a PDF Statement.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                  format: uuid
+                  example: 11111111-2222-3333-4444-555555555555
+                accId:
+                  type: string
+                  format: uuid
+                  example: 11111111-2222-3333-4444-555555555555
+                type:
+                  type: string
+                  enum:
+                    - thismonth
+                    - lastmonth
+                    - thisyear
+                    - lastyear
+                    - last12months
+                    - daterange
+                    - forever
+                  example: lastmonth
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+              required:
+                - clientId
+                - accId
+                - type
+  /media/uploadphotos:
+    post:
+      summary: Upload one or more photos as evidence of a claim/requirement
+      operationId: post-media-uploadphotos
+      responses:
+        '200':
+          $ref: '#/components/responses/Message'
+        '412':
+          $ref: '#/components/responses/Message'
+      description: >-
+        Allow uploading of one or more photos.  Note that the access bitset
+        needs to be check to ensure this is available.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                  format: uuid
+                  example: 11111111-2222-3333-4444-555555555555
+                notes:
+                  type: string
+                  example: >-
+                    Dave needs a new duvet set - the old one is quite old and
+                    worn out
+                files:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    format: binary
+              required:
+                - clientId
+                - notes
+                - files
+        description: >-
+          Note that form data is used - not sure if the schema works in this
+          case...
+      tags:
+        - media
+  /media/uploadvideo:
+    post:
+      summary: Upload a video as evidence of a claim/requirement
+      operationId: post-media-uploadvideo
+      responses:
+        '200':
+          $ref: '#/components/responses/Message'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                  format: uuid
+                  example: 11111111-2222-3333-4444-555555555555
+                notes:
+                  type: string
+                  example: >-
+                    Dave needs a new duvet set - the old one is quite old and
+                    worn out
+                filename:
+                  type: string
+                  format: binary
+              required:
+                - clientId
+                - notes
+                - filename
+        description: >-
+          Note that form data is used - not sure if the schema works in this
+          case...
+      description: >-
+        Allow uploading of a video.  Assumption is that this a an H.264/.mp4
+        file.  Need to make sure this is transcoded to a sensible fie size
+        ideally so that we're not sending 4K masterpieces that last ten
+        minutes!  Should ideally cut off after 30 seconds.
+      tags:
+        - media
+  /registration:
+    get:
+      summary: User registration access
+      tags:
+        - registration
+      responses:
+        '200':
+          $ref: '#/components/responses/Registration'
+        '404':
+          description: The App User has not previously registered
+      operationId: get-registration
+      description: Find whether or not the user is registered
+    post:
+      summary: Register or update registration
+      operationId: post-registration
+      responses:
+        '200':
+          description: OK
+        '412':
+          $ref: '#/components/responses/Message'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  example: Dave Smith
+                dateOfBirth:
+                  type: string
+                  format: date
+                  example: '1975-11-24'
+                detail:
+                  type: string
+                  example: Carer
+              required:
+                - fullName
+                - dateOfBirth
+                - detail
+      tags:
+        - registration
+      description: Register or update registration of the App User
+  /request/list:
+    get:
+      summary: List pending request for the App User
+      tags:
+        - request
+      responses:
+        '200':
+          $ref: '#/components/responses/RequestList'
+      operationId: get-request-list
+      description: >-
+        Retrieve the list of pending requests.  Valid for there to be zero
+        entries.
+  /request/create:
+    post:
+      summary: Create a request to access a client account
+      operationId: post-request-create
+      responses:
+        '200':
+          $ref: '#/components/responses/Message'
+      description: Create a request from the JSON object submitted
+      tags:
+        - request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  example: John Smith
+                  minLength: 5
+                  description: >-
+                    Full name of the client who holds the account being
+                    requested
+                dateOfBirth:
+                  type: string
+                  format: date
+                  example: '1978-05-30'
+                  description: >-
+                    Date of birth of the client who holds the account being
+                    request
+                telNo:
+                  type: string
+                  minLength: 10
+                  example: '0161123456'
+                notes:
+                  type: string
+                  minLength: 5
+                  example: I am the carer for John and visit 5 days a week
+              required:
+                - fullName
+                - dateOfBirth
+                - telNo
+                - notes
+components:
+  schemas:
+    Account:
+      description: Basic details of the account
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 11111111-2222-3333-4444-555555555555
+        name:
+          type: string
+          example: CASHPLUS CLIENT BUDGET ACCOUNT
+        clientId:
+          type: string
+          format: uuid
+          example: 99999999-8888-7777-6666-555555555555
+        clientName:
+          type: string
+          example: DORRIS CLIENT
+        sortCode:
+          type: string
+          example: '300002'
+          minLength: 6
+          maxLength: 6
+        accountNo:
+          type: string
+          minLength: 8
+          maxLength: 8
+          example: '01234567'
+        balance:
+          type: number
+          format: double
+          example: 127.89
+        balanceDate:
+          type: string
+          format: date
+          example: '2022-03-25'
+        allowanceLeft:
+          type: integer
+          example: 20
+          minimum: 0
+          maximum: 500
+          multipleOf: 10
+        access:
+          type: integer
+          description: |-
+            A 'bitset' of the access the caller has to the account
+            0x01 - Account Balance is available
+            0x02 - Account transactions are available
+            0x04 - Statements are available
+            0x08 - Images can be sent in
+            0x10 - Videos can be sent in
+            0x20 - Discretionary allowance can be requested
+          format: int32
+          example: 7
+      required:
+        - id
+        - name
+        - clientId
+        - clientName
+        - sortCode
+        - accountNo
+        - balance
+        - balanceDate
+        - allowanceLeft
+        - access
+    Request:
+      description: Details of any pending requests the App User has made
+      type: object
+      title: Request
+      properties:
+        fullName:
+          type: string
+          example: Harry Client
+          description: >-
+            The full name of the client that the App User is claiming
+            responsibility for (could also be the client themselves)
+        dateOfBirth:
+          type: string
+          example: '1976-11-29'
+          format: date
+          description: Date of birth of the Client for verification
+        phoneNumber:
+          type: string
+          example: '0161123456'
+          minLength: 10
+        notes:
+          type: string
+          example: 'I am his social worker and visit on Monday, Wednesday and Friday'
+      required:
+        - fullName
+        - dateOfBirth
+        - phoneNumber
+        - notes
+    Transaction:
+      title: Transaction
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2022-03-25'
+          description: Date that the transaction was made
+        narrative:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: >-
+            Multiple lines of statement narrative for the transaction.  Minimum
+            is one line but could be up to six.
+          items:
+            type: string
+            example: NARRATIVE LINE 1
+        amount:
+          type: number
+          example: 115.36
+          description: >-
+            Positive amount when transaction is credit and negative when it's a
+            debit.
+          format: double
+        balance:
+          type: number
+          format: double
+          example: 935.66
+          description: >-
+            The running balance for the account after this transaction took
+            effect.
+      required:
+        - date
+        - narrative
+        - amount
+        - balance
+  securitySchemes:
+    firebase:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: ''
+          scopes: {}
+      x-google-issuer: 'https://securetoken.google.uk.org/mcf-mobile2'
+      x-google-jwks_uri: >-
+        https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com
+      x-google-audiences: mcf-mobile2
+  responses:
+    AccountDetail:
+      description: Detail view of an account
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                example: 11111111-2222-3333-4444-555555555555
+              name:
+                type: string
+                example: DORRIS CLIENT
+              clientId:
+                type: string
+                format: uuid
+                example: 99999999-8888-7777-6666-555555555555
+              clientName:
+                type: string
+                example: DAVE CARER
+              sortCode:
+                type: string
+                minLength: 6
+                maxLength: 6
+                example: '012345'
+              accountNo:
+                type: string
+                minLength: 8
+                maxLength: 8
+                example: '01234567'
+              balance:
+                type: number
+                format: double
+                example: 120.77
+              balanceDate:
+                type: string
+                format: date
+                example: '2022-03-16'
+              allowance:
+                type: integer
+                minimum: 0
+                maximum: 500
+                multipleOf: 10
+                format: int32
+                example: 40
+              allowanceLeft:
+                type: integer
+                minimum: 0
+                maximum: 500
+                multipleOf: 10
+                example: 20
+              allowancePeriod:
+                type: string
+                enum:
+                  - none
+                  - weekly
+                  - biweekly
+                  - monthly
+                example: weekly
+              access:
+                type: integer
+                description: |-
+                  A 'bitset' of the access the caller has to the account
+                  0x01 - Account Balance is available
+                  0x02 - Account transactions are available
+                  0x04 - Statements are available
+                  0x08 - Images can be sent in
+                  0x10 - Videos can be sent in
+                  0x20 - Discretionary funds can be requested
+                format: int32
+                example: 7
+            required:
+              - id
+              - name
+              - clientId
+              - clientName
+              - sortCode
+              - accountNo
+              - balance
+              - balanceDate
+              - allowance
+              - allowanceLeft
+              - allowancePeriod
+              - access
+        application/xml:
+          schema:
+            type: object
+            properties: {}
+    AccountList:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Account'
+    Message:
+      description: Standard message based response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                example: The amount is greater than your remaining allowance
+            required:
+              - msg
+    Registration:
+      description: Details supplied originally by the user via the App
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              fullName:
+                type: string
+                example: Dave Smith
+              dateOfBirth:
+                type: string
+                format: date
+                example: '1975-11-24'
+              detail:
+                type: string
+                example: Carer
+            required:
+              - fullName
+              - dateOfBirth
+    RequestList:
+      description: >-
+        List of any pending requests for the App User.  These are requests to
+        link a client account to their registration.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Request'
+    TransactionList:
+      description: List of transactions for a particular account
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Transaction'
+tags:
+  - name: account
+  - name: discretionary
+  - name: media
+  - name: registration
+  - name: request
+  - name: statement
+security:
+  - firebase: []
